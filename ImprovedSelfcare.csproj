@@ -22,20 +22,20 @@
   
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\LootValue\Shared\Assembly-CSharp.dll</HintPath>
+      <HintPath>D:\SPT Iterations\Assemblies 4.0\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Comfort">
-      <HintPath>..\SharedDlls\Comfort.dll</HintPath>
+      <HintPath>D:\SPT Iterations\Assemblies 4.0\Comfort.dll</HintPath>
     </Reference>
     <Reference Include="spt-reflection">
-      <HintPath>..\SharedDlls\spt-reflection.dll</HintPath>
+      <HintPath>D:\SPT Iterations\Assemblies 4.0\Core\spt-reflection.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\SharedDlls\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>D:\SPT Iterations\Assemblies 4.0\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
   </ItemGroup>
   
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy /y /r /i &quot;$(SolutionDir)bin\$(ConfigurationName)\net472\HealingAutoCancel.dll&quot; &quot;I:\Pelit\EFT SPT 3.10\BepInEx\plugins\&quot;&#xD;&#xA;xcopy /y /r /i &quot;$(SolutionDir)bin\$(ConfigurationName)\net472\HealingAutoCancel.dll&quot; &quot;I:\Koodaus\SPT-AKI\C#\ImprovedSelfcare\Releases\BepInEx\plugins\&quot;" />
+    <Exec Command="xcopy /y /r /i &quot;$(SolutionDir)bin\$(ConfigurationName)\net472\HealingAutoCancel.dll&quot; &quot;$(ProjectDir)Build\BepInEx\plugins\&quot;&#xD;&#xA;xcopy /y /r /i &quot;$(SolutionDir)bin\$(ConfigurationName)\net472\HealingAutoCancel.dll&quot; &quot;D:\SPT Iterations\4.0.0\BepInEx\plugins\&quot;" />
   </Target>
 </Project>
