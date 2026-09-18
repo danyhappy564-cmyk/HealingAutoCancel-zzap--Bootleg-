@@ -44,20 +44,18 @@
 `EFT.HealthSystem.BaseHealthController<T>`(제네릭 베이스 클래스)에 이름 그대로
 살아있음을 확인해서 **손대지 않았습니다.**
 
-## 컨테이너에서 검증한 것 / 못 한 것 / 실수한 것
+## 검증 상태
 
-- **검증함:** `Meds`/`DamageInfo` 리네임은 `Cluade_For_spt/references/Assembly-CSharp.dll`
-  (실제 4.1 게임 클라이언트 어셈블리)에 대해 `dnfile`로 IL 메타데이터를 직접 읽어 대조했고,
-  실제 로컬 빌드 로그에서도 이 부분은 에러가 나지 않았습니다.
-- **실수했다가 고침:** `Cluade_For_spt/references/SPTarkov.Reflection.dll`을 "클라이언트용
-  Harmony 래퍼도 이 이름으로 바뀌었다"고 잘못 일반화해서 `SPT.Reflection.Patching`/
-  `ModulePatch`를 `SPTarkov.Reflection.Patching`/`AbstractPatch`로 바꿨었습니다. 실제로는
-  그 참조 dll이 **서버용**(net10.0)이었고, 클라이언트는 4.0과 마찬가지로
-  `spt-reflection.dll`/`ModulePatch`를 씁니다. 이미 성공적으로 빌드된 다른 4.1 포크를
-  직접 대조하고 나서야 확정했습니다 — 컨테이너 안 추정만으로는 못 잡는 실수였습니다.
-- **컨테이너에서 여전히 못 함:** 이 원격 컨테이너에는 .NET SDK와 실제 SPT 설치본이 없어서
-  `dotnet build`를 직접 돌릴 수 없습니다. **실제 컴파일·인게임 동작 확인은 계속
-  로컬 Windows(`E:\SPT 4.1`)에서 해주셔야 합니다.**
+- **빌드 성공 확인됨 (2026-09-18, 사용자 로컬 Windows 빌드).** 위 표의 수정 전부
+  실제 컴파일을 통과했습니다.
+- **실수했다가 고침:** 처음엔 `Cluade_For_spt/references/SPTarkov.Reflection.dll`을
+  "클라이언트용 Harmony 래퍼도 이 이름으로 바뀌었다"고 잘못 일반화해서
+  `SPT.Reflection.Patching`/`ModulePatch`를 `SPTarkov.Reflection.Patching`/
+  `AbstractPatch`로 바꿨었습니다. 실제로는 그 참조 dll이 **서버용**(net10.0)이었고,
+  클라이언트는 4.0과 마찬가지로 `spt-reflection.dll`/`ModulePatch`를 씁니다. 이미
+  성공적으로 빌드된 다른 4.1 포크를 직접 대조하고 나서야 확정했습니다.
+- **아직 확인 안 됨:** 인게임 동작(실제로 붕대/메드킷 사용 중 자동 취소가 되는지).
+  빌드·설치는 끝났으니 다음은 실전 확인입니다.
 
 ## 빌드 방법 (로컬, Windows)
 
