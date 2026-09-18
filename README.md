@@ -33,27 +33,31 @@
 
 | 4.0 | 4.1 | 확인 방법 |
 |---|---|---|
-| `using SPT.Reflection.Patching;` / `class X : ModulePatch` | `using SPTarkov.Reflection.Patching;` / `class X : AbstractPatch` | `SPTarkov.Reflection.dll`(버전 `4.1.5.0`)의 `TypeDef` 전수 조회 — `ModulePatch`는 없고 `AbstractPatch`만 존재, `PatchPrefixAttribute`/`PatchPostfixAttribute`는 이름 그대로 유지 |
-| `MedsItemClass` | `EFT.InventoryLogic.Meds` | 실제 `Assembly-CSharp.dll`에서 `MedsItemClass` TypeDef 0건, `EFT.InventoryLogic.Meds`가 `MedKitComponent` 필드를 그대로 들고 있음을 확인 |
-| `DamageInfoStruct` | `EFT.Ballistics.DamageInfo` | `ActiveHealthController.HealthChangedEvent`의 델리게이트 시그니처(IL `TypeSpec` 직접 디코딩)가 `Action<EBodyPart, float, EFT.Ballistics.DamageInfo>`임을 확인 |
-| `TargetFramework net472` + 하드코딩된 `D:\SPT Iterations\...` HintPath | `TargetFramework netstandard2.1` + `SptRoot`(기본값 `E:\SPT 4.1`) 기반 `$(Managed)`/`$(SptRuntime)` 프로퍼티 | KB 5절 클라 플러그인 표준 템플릿 |
-| `SPTarkov.Reflection.dll` 위치를 `BepInEx\plugins\spt`로 추정 | 실제 설치본 확인 결과 `E:\SPT 4.1\SPT_Runtime\SPTarkov.Reflection.dll` — `SptRuntime` 프로퍼티로 분리 | 사용자 확인 (2026-09-18) |
-| 진짜 SPT 설치본 검증 없음 | `EnsureRealSptReflection` 빌드 가드 추가 — 빌드에 쓰는 `SPTarkov.Reflection.dll`이 `1.0.0.0`(플레이스홀더)이면 빌드 자체를 실패시킴 | KB 2.1절 (런처가 참조 dll 버전으로 "빌드된 SPT 버전"을 판정하는 것에 대한 대응) |
+| `MedsItemClass` | `EFT.InventoryLogic.Meds` | 실제 `Assembly-CSharp.dll`에서 `MedsItemClass` TypeDef 0건, `EFT.InventoryLogic.Meds`가 `MedKitComponent` 필드를 그대로 들고 있음을 확인 — **실제 로컬 빌드에서 이 부분은 에러 없이 통과함** |
+| `DamageInfoStruct` | `EFT.Ballistics.DamageInfo` | `ActiveHealthController.HealthChangedEvent`의 델리게이트 시그니처(IL `TypeSpec` 직접 디코딩)가 `Action<EBodyPart, float, EFT.Ballistics.DamageInfo>`임을 확인 — 마찬가지로 실제 빌드에서 통과 |
+| `TargetFramework net472` + 하드코딩된 `D:\SPT Iterations\...` HintPath | `TargetFramework netstandard2.1` + `SptRoot`(기본값 `E:\SPT 4.1`) 기반 `$(Managed)`/`$(SptPlugins)` 프로퍼티 | 이미 4.1로 포팅·빌드 성공한 다른 포크(`SPTScopeTweak-4.1-zzap--Bootleg-`)와 동일 패턴 |
+| `using SPT.Reflection.Patching;` / `class X : ModulePatch` | **바뀌지 않았습니다.** 4.0과 동일하게 유지 | ⚠️ 한 번 `SPTarkov.Reflection.Patching`/`AbstractPatch`로 잘못 바꿨다가(서버용 `SPTarkov.Reflection.dll`을 클라 플러그인에 잘못 참조) `CS0508`/`CS1705`/`System.Runtime` 버전 충돌로 빌드가 깨졌습니다. `SPTScopeTweak-4.1-zzap--Bootleg-`의 실제 빌드 성공 사례를 대조해서 원상복구했습니다 — **클라이언트용 Harmony 래퍼는 4.1에서도 여전히 `spt-reflection.dll` / `SPT.Reflection.Patching.ModulePatch`** 입니다. `SPTarkov.Reflection.dll`(`SPT_Runtime` 아래, net10.0)은 **서버용**이고 클라 플러그인과는 무관합니다. |
+| 진짜 SPT 설치본 검증 없음 | `EnsureRealSptReflection` 빌드 가드 추가 — 빌드에 쓰는 `spt-reflection.dll`이 `1.0.0.0`(플레이스홀더)이면 빌드 자체를 실패시킴 | KB 2.1절 (런처가 참조 dll 버전으로 "빌드된 SPT 버전"을 판정하는 것에 대한 대응) |
 
 그 외 로직(부위 체력·출혈 판정, `RemoveMedEffect()` 호출, 이벤트 구독 방식)은
 `GetBodyPartHealth` / `IsBodyPartBroken` / `BodyPartEffects` 모두 4.1의
 `EFT.HealthSystem.BaseHealthController<T>`(제네릭 베이스 클래스)에 이름 그대로
 살아있음을 확인해서 **손대지 않았습니다.**
 
-## 컨테이너에서 검증한 것 / 못 한 것
+## 컨테이너에서 검증한 것 / 못 한 것 / 실수한 것
 
-- **검증함:** 위 표의 모든 타입/멤버 이름을 `Cluade_For_spt/references/Assembly-CSharp.dll`,
-  `SPTarkov.Reflection.dll`(SPT 4.1 실제 게임/플러그인 어셈블리)에 대해 `dnfile`로
-  IL 메타데이터를 직접 읽어 대조했습니다. 컴파일러 없이도 "이 심볼이 실제로 존재하는가"는
-  확정된 사실입니다.
-- **검증 못 함(이 원격 컨테이너에는 .NET SDK와 실제 SPT 설치본이 없음):** 실제 `dotnet build`
-  컴파일, BepInEx 로드, 인게임 동작 확인. **로컬 Windows(`E:\SPT 4.1`)에서 직접 빌드·설치 후
-  확인이 필요합니다.**
+- **검증함:** `Meds`/`DamageInfo` 리네임은 `Cluade_For_spt/references/Assembly-CSharp.dll`
+  (실제 4.1 게임 클라이언트 어셈블리)에 대해 `dnfile`로 IL 메타데이터를 직접 읽어 대조했고,
+  실제 로컬 빌드 로그에서도 이 부분은 에러가 나지 않았습니다.
+- **실수했다가 고침:** `Cluade_For_spt/references/SPTarkov.Reflection.dll`을 "클라이언트용
+  Harmony 래퍼도 이 이름으로 바뀌었다"고 잘못 일반화해서 `SPT.Reflection.Patching`/
+  `ModulePatch`를 `SPTarkov.Reflection.Patching`/`AbstractPatch`로 바꿨었습니다. 실제로는
+  그 참조 dll이 **서버용**(net10.0)이었고, 클라이언트는 4.0과 마찬가지로
+  `spt-reflection.dll`/`ModulePatch`를 씁니다. 이미 성공적으로 빌드된 다른 4.1 포크를
+  직접 대조하고 나서야 확정했습니다 — 컨테이너 안 추정만으로는 못 잡는 실수였습니다.
+- **컨테이너에서 여전히 못 함:** 이 원격 컨테이너에는 .NET SDK와 실제 SPT 설치본이 없어서
+  `dotnet build`를 직접 돌릴 수 없습니다. **실제 컴파일·인게임 동작 확인은 계속
+  로컬 Windows(`E:\SPT 4.1`)에서 해주셔야 합니다.**
 
 ## 빌드 방법 (로컬, Windows)
 

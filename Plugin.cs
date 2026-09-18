@@ -1,4 +1,4 @@
-﻿using SPTarkov.Reflection.Patching;
+﻿using SPT.Reflection.Patching;
 using BepInEx;
 using Comfort.Common;
 using EFT;
@@ -36,7 +36,7 @@ namespace ImprovedSelfcare
 		}
 	}
 
-	internal class HealingAutoCancelPatch : AbstractPatch
+	internal class HealingAutoCancelPatch : ModulePatch
 	{
 		protected override MethodBase GetTargetMethod()
 		{
