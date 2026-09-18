@@ -15,6 +15,9 @@
     <Managed>$(SptRoot)\EscapeFromTarkov_Data\Managed</Managed>
     <BepInExCore>$(SptRoot)\BepInEx\core</BepInExCore>
     <SptPlugins>$(SptRoot)\BepInEx\plugins\spt</SptPlugins>
+    <!-- SPTarkov.Reflection.dll의 실제 위치. BepInEx/plugins/spt가 아니라
+         SPT_Runtime 아래에 있다(2026-09-18, 실제 설치본으로 확인). -->
+    <SptRuntime>$(SptRoot)\SPT_Runtime</SptRuntime>
   </PropertyGroup>
 
   <ItemGroup>
@@ -36,7 +39,7 @@
       <HintPath>$(Managed)\Comfort.dll</HintPath>
     </Reference>
     <Reference Include="SPTarkov.Reflection">
-      <HintPath>$(SptPlugins)\SPTarkov.Reflection.dll</HintPath>
+      <HintPath>$(SptRuntime)\SPTarkov.Reflection.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>$(Managed)\UnityEngine.CoreModule.dll</HintPath>
@@ -47,7 +50,7 @@
        판정한다. SptRoot가 진짜 설치본이 아니라 깡통/플레이스홀더 dll을 가리키면 빌드 자체를
        실패시켜서, 런처가 거부하는 배포물을 만드는 사고를 막는다. -->
   <Target Name="EnsureRealSptReflection" AfterTargets="ValidateSptRoot" BeforeTargets="BeforeBuild;ResolveAssemblyReferences">
-    <GetAssemblyIdentity AssemblyFiles="$(SptPlugins)\SPTarkov.Reflection.dll">
+    <GetAssemblyIdentity AssemblyFiles="$(SptRuntime)\SPTarkov.Reflection.dll">
       <Output TaskParameter="Assemblies" ItemName="_SptReflectionIdentity" />
     </GetAssemblyIdentity>
     <Error Condition="'%(_SptReflectionIdentity.Version)' == '1.0.0.0'"

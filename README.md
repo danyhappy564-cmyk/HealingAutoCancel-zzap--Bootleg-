@@ -36,7 +36,8 @@
 | `using SPT.Reflection.Patching;` / `class X : ModulePatch` | `using SPTarkov.Reflection.Patching;` / `class X : AbstractPatch` | `SPTarkov.Reflection.dll`(버전 `4.1.5.0`)의 `TypeDef` 전수 조회 — `ModulePatch`는 없고 `AbstractPatch`만 존재, `PatchPrefixAttribute`/`PatchPostfixAttribute`는 이름 그대로 유지 |
 | `MedsItemClass` | `EFT.InventoryLogic.Meds` | 실제 `Assembly-CSharp.dll`에서 `MedsItemClass` TypeDef 0건, `EFT.InventoryLogic.Meds`가 `MedKitComponent` 필드를 그대로 들고 있음을 확인 |
 | `DamageInfoStruct` | `EFT.Ballistics.DamageInfo` | `ActiveHealthController.HealthChangedEvent`의 델리게이트 시그니처(IL `TypeSpec` 직접 디코딩)가 `Action<EBodyPart, float, EFT.Ballistics.DamageInfo>`임을 확인 |
-| `TargetFramework net472` + 하드코딩된 `D:\SPT Iterations\...` HintPath | `TargetFramework netstandard2.1` + `SptRoot`(기본값 `E:\SPT 4.1`) 기반 `$(Managed)`/`$(SptPlugins)` 프로퍼티 | KB 5절 클라 플러그인 표준 템플릿 |
+| `TargetFramework net472` + 하드코딩된 `D:\SPT Iterations\...` HintPath | `TargetFramework netstandard2.1` + `SptRoot`(기본값 `E:\SPT 4.1`) 기반 `$(Managed)`/`$(SptRuntime)` 프로퍼티 | KB 5절 클라 플러그인 표준 템플릿 |
+| `SPTarkov.Reflection.dll` 위치를 `BepInEx\plugins\spt`로 추정 | 실제 설치본 확인 결과 `E:\SPT 4.1\SPT_Runtime\SPTarkov.Reflection.dll` — `SptRuntime` 프로퍼티로 분리 | 사용자 확인 (2026-09-18) |
 | 진짜 SPT 설치본 검증 없음 | `EnsureRealSptReflection` 빌드 가드 추가 — 빌드에 쓰는 `SPTarkov.Reflection.dll`이 `1.0.0.0`(플레이스홀더)이면 빌드 자체를 실패시킴 | KB 2.1절 (런처가 참조 dll 버전으로 "빌드된 SPT 버전"을 판정하는 것에 대한 대응) |
 
 그 외 로직(부위 체력·출혈 판정, `RemoveMedEffect()` 호출, 이벤트 구독 방식)은
