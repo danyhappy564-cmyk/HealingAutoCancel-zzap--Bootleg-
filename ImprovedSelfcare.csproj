@@ -1,12 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>HealingAutoCancel</AssemblyName>
     <Description>Makes healing less dumb</Description>
     <Version>1.0.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <SptRoot Condition="'$(SptRoot)' == '' And '$(SPT_ROOT)' != ''">$(SPT_ROOT)</SptRoot>
+    <SptRoot Condition="'$(SptRoot)' == ''">E:\SPT 4.1</SptRoot>
+    <Managed>$(SptRoot)\EscapeFromTarkov_Data\Managed</Managed>
+    <BepInExCore>$(SptRoot)\BepInEx\core</BepInExCore>
+    <SptPlugins>$(SptRoot)\BepInEx\plugins\spt</SptPlugins>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,27 +23,54 @@
     <PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
     <PackageReference Include="UnityEngine.Modules" Version="5.6.0" IncludeAssets="compile" />
   </ItemGroup>
-  
+
   <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>D:\SPT Iterations\Assemblies 4.0\Assembly-CSharp.dll</HintPath>
+      <HintPath>$(Managed)\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Comfort">
-      <HintPath>D:\SPT Iterations\Assemblies 4.0\Comfort.dll</HintPath>
+      <HintPath>$(Managed)\Comfort.dll</HintPath>
     </Reference>
-    <Reference Include="spt-reflection">
-      <HintPath>D:\SPT Iterations\Assemblies 4.0\Core\spt-reflection.dll</HintPath>
+    <Reference Include="SPTarkov.Reflection">
+      <HintPath>$(SptPlugins)\SPTarkov.Reflection.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>D:\SPT Iterations\Assemblies 4.0\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>$(Managed)\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
   </ItemGroup>
-  
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy /y /r /i &quot;$(SolutionDir)bin\$(ConfigurationName)\net472\HealingAutoCancel.dll&quot; &quot;$(ProjectDir)Build\BepInEx\plugins\&quot;&#xD;&#xA;xcopy /y /r /i &quot;$(SolutionDir)bin\$(ConfigurationName)\net472\HealingAutoCancel.dll&quot; &quot;D:\SPT Iterations\4.0.0\BepInEx\plugins\&quot;" />
+
+  <!-- SPT 4.1 런처는 참조된 SPTarkov.Reflection.dll의 어셈블리 버전으로 "빌드된 SPT 버전"을
+       판정한다. SptRoot가 진짜 설치본이 아니라 깡통/플레이스홀더 dll을 가리키면 빌드 자체를
+       실패시켜서, 런처가 거부하는 배포물을 만드는 사고를 막는다. -->
+  <Target Name="EnsureRealSptReflection" AfterTargets="ValidateSptRoot" BeforeTargets="BeforeBuild;ResolveAssemblyReferences">
+    <GetAssemblyIdentity AssemblyFiles="$(SptPlugins)\SPTarkov.Reflection.dll">
+      <Output TaskParameter="Assemblies" ItemName="_SptReflectionIdentity" />
+    </GetAssemblyIdentity>
+    <Error Condition="'%(_SptReflectionIdentity.Version)' == '1.0.0.0'"
+           Text="SPTarkov.Reflection.dll under SptRoot '$(SptRoot)' reports version 1.0.0.0, a placeholder. A plugin built against it is rejected by the launcher. Point SptRoot at a real SPT installation." />
   </Target>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy /y /r /i &quot;$(SolutionDir)bin\$(ConfigurationName)\$(TargetFramework)\HealingAutoCancel.dll&quot; &quot;$(ProjectDir)Build\BepInEx\plugins\&quot;&#xD;&#xA;xcopy /y /r /i &quot;$(SolutionDir)bin\$(ConfigurationName)\$(TargetFramework)\HealingAutoCancel.dll&quot; &quot;$(SptRoot)\BepInEx\plugins\&quot;" />
+  </Target>
+
+  <!-- Release 빌드마다 release/HealingAutoCancel-<버전>.zip을 만든다.
+       zip 내부 구조는 BepInEx/plugins/HealingAutoCancel.dll 그대로라 압축을 풀어서
+       BepInEx/plugins/ 위에 덮어쓰기만 하면 설치가 끝난다. -->
+  <Target Name="PackageRelease" AfterTargets="PostBuild" Condition="'$(Configuration)' == 'Release'">
+    <PropertyGroup>
+      <ReleaseStagingDir>$(ProjectDir)obj\release-staging\BepInEx\plugins\</ReleaseStagingDir>
+      <ReleaseZip>$(ProjectDir)release\$(AssemblyName)-$(Version).zip</ReleaseZip>
+    </PropertyGroup>
+    <RemoveDir Directories="$(ProjectDir)obj\release-staging" Condition="Exists('$(ProjectDir)obj\release-staging')" />
+    <MakeDir Directories="$(ReleaseStagingDir)" />
+    <MakeDir Directories="$(ProjectDir)release" Condition="!Exists('$(ProjectDir)release')" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ReleaseStagingDir)" />
+    <ZipDirectory SourceDirectory="$(ProjectDir)obj\release-staging" DestinationFile="$(ReleaseZip)" Overwrite="true" />
+  </Target>
+
 </Project>

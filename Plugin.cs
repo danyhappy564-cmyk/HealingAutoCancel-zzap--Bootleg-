@@ -1,4 +1,4 @@
-﻿using SPT.Reflection.Patching;
+﻿using SPTarkov.Reflection.Patching;
 using BepInEx;
 using Comfort.Common;
 using EFT;
@@ -36,7 +36,7 @@ namespace ImprovedSelfcare
 		}
 	}
 
-	internal class HealingAutoCancelPatch : ModulePatch
+	internal class HealingAutoCancelPatch : AbstractPatch
 	{
 		protected override MethodBase GetTargetMethod()
 		{
@@ -53,12 +53,12 @@ namespace ImprovedSelfcare
 			Globals.activeHealthController.HealthChangedEvent += ActiveHealthController_HealthChangedEvent;
 		}
 
-		private static void ActiveHealthController_HealthChangedEvent(EBodyPart bodyPart, float amount, DamageInfoStruct damageInfo)
+		private static void ActiveHealthController_HealthChangedEvent(EBodyPart bodyPart, float amount, EFT.Ballistics.DamageInfo damageInfo)
 		{
 			if (damageInfo.DamageType != EDamageType.Medicine)
 				return;
 
-			MedsItemClass medkitInHands = Globals.player.TryGetItemInHands<MedsItemClass>();			
+			EFT.InventoryLogic.Meds medkitInHands = Globals.player.TryGetItemInHands<EFT.InventoryLogic.Meds>();
 
 			//Try to ignore any healing done by stims and ensure we do not try to cancel fixing a broken limb
 			if (medkitInHands != null && !Globals.activeHealthController.IsBodyPartBroken(bodyPart))
