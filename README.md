@@ -4,10 +4,10 @@
 
 ### ⚠️ IMPORTANT NOTICE / DISCLAIMER
 
-**Original Author:** IhanaMies (Mikael Palokangas)
-**Original Repository:** HealingAutoCancel
-**Original Link:** https://github.com/IhanaMies/HealingAutoCancel
-**License notation:** MIT License (원본 `LICENSE.txt` 그대로 유지)
+- **Original Author:** IhanaMies (Mikael Palokangas)
+- **Original Repository:** HealingAutoCancel
+- **Original Link:** https://github.com/IhanaMies/HealingAutoCancel
+- **License:** MIT License (원본 `LICENSE.txt` 그대로 유지)
 
 1. **Reflection & Take-Downs:** 저는 ECOT 사건을 깊이 반성하며, AI 도움을 받는 "바이브 코더"로서 원작자가 요청하면 즉시 파일을 삭제합니다.
 2. **No Re-Distribution:** 이 포팅 빌드는 검증되지 않은 임시 수정본입니다. 다른 곳에 재업로드·공유하지 말아 주세요.
